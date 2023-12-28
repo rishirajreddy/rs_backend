@@ -1,0 +1,26 @@
+{
+  "kind": "collectionType",
+  "collectionName": "reseller_customers",
+  "info": {
+    "singularName": "reseller-customer",
+    "pluralName": "reseller-customers",
+    "displayName": "Reseller Customer",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "reseller": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "customer": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    }
+  }
+}

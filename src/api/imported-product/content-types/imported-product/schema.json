@@ -1,0 +1,34 @@
+{
+  "kind": "collectionType",
+  "collectionName": "imported_products",
+  "info": {
+    "singularName": "imported-product",
+    "pluralName": "imported-products",
+    "displayName": "Imported Product",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "product": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::product.product",
+      "inversedBy": "imported_product"
+    },
+    "reseller": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "imported_product"
+    },
+    "reselling_price": {
+      "type": "decimal"
+    },
+    "reseller_margin": {
+      "type": "decimal"
+    }
+  }
+}
