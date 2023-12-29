@@ -821,177 +821,64 @@ module.exports = {
       .query("api::global.global")
       .findOne({ select: ["user_verification_method"] });
 
-    switch (global.user_verification_method) {
-      case "FIREBASE":
-        try {
-          console.log("Inside firebase Auth");
-          try {
-            const idToken = await admin
-              .auth()
-              .verifyIdToken(ctx.request.body.verificationId);
-            const phoneNumber = idToken.phone_number;
-            console.log(phoneNumber);
-            if (phoneNumber === ctx.request.body.phoneNumber) {
-              console.log("User Verified");
-              //update user
-              // let phone = phoneNumber.slice(-10);
-              const user = await strapi
-                .query("plugin::users-permissions.user")
-                .findOne({
-                  where: {
-                    $or: [
-                      {
-                        phone: phoneNumber,
-                      },
-                      {
-                        phone: phoneNumber.slice(-10),
-                      },
-                    ],
-                  },
-                });
-              if (user) {
-                if (user.isAdmin) {
-                  const updateUser = await strapi
-                    .query("plugin::users-permissions.user")
-                    .update({
-                      data: {
-                        confirmed: true,
-                      },
-                      where: {
-                        phone: phoneNumber,
-                      },
-                    });
+    try {
+      let phone = ctx.request.body.phoneNumber;
+      const otp = ctx.request.body.otp;
 
-                  //create activity
-                  let activity_data = {
-                    event: activity_status.admin_login,
-                    user: updateUser.id,
-                    description: `Admin: ID:${user.id} Logged In`,
-                  };
+      console.log(phone);
 
-                  const activity = createActivity(activity_data, strapi);
-                } else {
-                  const updateUser = await strapi
-                    .query("plugin::users-permissions.user")
-                    .update({
-                      data: {
-                        confirmed: true,
-                      },
-                      where: {
-                        id: user.id,
-                      },
-                    });
-                  let activity_data = {
-                    event: activity_status.user_login,
-                    user: updateUser.id,
-                    description: `User: ID:${user.id} Logged In`,
-                  };
+      phone = phone.trim().split(" ").join("");
+      //check if the user is available or not
+      const user = await strapi
+        .query("plugin::users-permissions.user")
+        .findOne({
+          where: {
+            $or: [{ phone: phone }, { phone: phone.slice(-10) }],
+          },
+        });
 
-                  const activity = createActivity(activity_data, strapi);
-                }
-                console.log(
-                  "Phone number verified successfully And the user is confirmed"
-                );
-                const token = JWT.sign(
-                  { id: user.id, email: user.email, username: user.username },
-                  process.env.JWT_SECRET,
-                  {
-                    expiresIn: "7d",
-                  }
-                );
+      if (!user) {
+        return ctx.send(
+          { message: "No User found with this phone number" },
+          400
+        );
+      }
 
-                delete user.password;
-                return ctx.send(
-                  {
-                    jwt: token,
-                    user,
-                  },
-                  200
-                );
-              } else {
-                return ctx.send(
-                  {
-                    message: "Something Went Wrong",
-                  },
-                  500
-                );
-              }
-            }
-          } catch (err) {
-            console.log(err);
-            return ctx.send(err, 500);
-          }
-        } catch (err) {
-          console.log(err);
-          return ctx.send(err, 400);
-        }
-        break;
+      //check otp
+      if (otp !== user.otp) {
+        return ctx.send({ message: "Otp is Invalid" }, 400);
+      }
 
-      case "MSG91":
-        console.log("Using mSG91");
-        try {
-          let phone = ctx.request.body.phoneNumber;
-          const otp = ctx.request.body.otp;
+      //check if otp expiration
+      const date = new Date();
+      if (date > user.otp_expiration) {
+        return ctx.send(
+          {
+            message:
+              "OTP has been expired. Please ReSend the OTP in order to validate",
+          },
+          400
+        );
+      }
 
-          console.log(phone);
+      //now return jwt
+      const token = JWT.sign({ id: user.id }, process.env.JWT_SECRET, {
+        expiresIn: "7d",
+      });
 
-          phone = phone.trim().split(" ").join("");
-          //check if the user is available or not
-          const user = await strapi
-            .query("plugin::users-permissions.user")
-            .findOne({
-              where: {
-                $or: [{ phone: phone }, { phone: phone.slice(-10) }],
-              },
-            });
-
-          if (!user) {
-            return ctx.send(
-              { message: "No User found with this phone number" },
-              400
-            );
-          }
-
-          //check otp
-          if (otp !== user.otp) {
-            return ctx.send({ message: "Otp is Invalid" }, 400);
-          }
-
-          //check if otp expiration
-          const date = new Date();
-          if (date > user.otp_expiration) {
-            return ctx.send(
-              {
-                message:
-                  "OTP has been expired. Please ReSend the OTP in order to validate",
-              },
-              400
-            );
-          }
-
-          //now return jwt
-          const token = JWT.sign({ id: user.id }, process.env.JWT_SECRET, {
-            expiresIn: "7d",
-          });
-
-          if (user.phone.slice(-10) == "8018801808") {
-            return ctx.send({ jwt: token, user }, 200);
-          }
-          const updateUser = await strapi
-            .query("plugin::users-permissions.user")
-            .update({
-              where: { id: user.id },
-              data: { otp: null, otp_expiration: null, confirmed: true },
-            });
-          return ctx.send({ jwt: token, user }, 200);
-        } catch (err) {
-          console.log(err);
-          return ctx.send(err, 400);
-        }
-        break;
-
-      default:
-        break;
+      if (user.phone.slice(-10) == "8018801808") {
+        return ctx.send({ jwt: token, user }, 200);
+      }
+      const updateUser = await strapi
+        .query("plugin::users-permissions.user")
+        .update({
+          where: { id: user.id },
+          data: { otp: null, otp_expiration: null, confirmed: true },
+        });
+      return ctx.send({ jwt: token, user }, 200);
+    } catch (err) {
+      console.log(err);
+      return ctx.send(err, 400);
     }
   },
 

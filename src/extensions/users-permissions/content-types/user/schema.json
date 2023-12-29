@@ -213,6 +213,12 @@
       "relation": "oneToOne",
       "target": "api::imported-product.imported-product",
       "mappedBy": "reseller"
+    },
+    "sub_domain": {
+      "type": "string"
+    },
+    "custom_domain": {
+      "type": "string"
     }
   }
 }
