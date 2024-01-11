@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "imported_product_variants",
+  "info": {
+    "singularName": "imported-product-variant",
+    "pluralName": "imported-product-variants",
+    "displayName": "Imported Product Variant",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "imported_product": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::imported-product.imported-product",
+      "inversedBy": "imported_product_variant"
+    },
+    "price": {
+      "type": "decimal"
+    },
+    "product_variant": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::product-variant.product-variant",
+      "inversedBy": "imported_product_variant"
+    }
+  }
+}

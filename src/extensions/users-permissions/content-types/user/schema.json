@@ -213,6 +213,12 @@
       "relation": "oneToOne",
       "target": "api::imported-product.imported-product",
       "mappedBy": "reseller"
+    },
+    "products": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::product.product",
+      "mappedBy": "seller"
     }
   }
 }

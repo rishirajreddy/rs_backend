@@ -92,6 +92,18 @@
       "relation": "oneToOne",
       "target": "api::imported-product.imported-product",
       "mappedBy": "product"
+    },
+    "brand": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::brand.brand",
+      "inversedBy": "products"
+    },
+    "seller": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "products"
     }
   }
 }

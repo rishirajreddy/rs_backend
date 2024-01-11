@@ -701,6 +701,11 @@ export interface PluginUsersPermissionsUser extends Schema.CollectionType {
       'oneToOne',
       'api::imported-product.imported-product'
     >;
+    products: Attribute.Relation<
+      'plugin::users-permissions.user',
+      'oneToMany',
+      'api::product.product'
+    >;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
@@ -1031,6 +1036,40 @@ export interface ApiBannerBanner extends Schema.CollectionType {
       Attribute.Private;
     updatedBy: Attribute.Relation<
       'api::banner.banner',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
+export interface ApiBrandBrand extends Schema.CollectionType {
+  collectionName: 'brands';
+  info: {
+    singularName: 'brand';
+    pluralName: 'brands';
+    displayName: 'Brand';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    products: Attribute.Relation<
+      'api::brand.brand',
+      'oneToMany',
+      'api::product.product'
+    >;
+    name: Attribute.String;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::brand.brand',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::brand.brand',
       'oneToOne',
       'admin::user'
     > &
@@ -1600,8 +1639,12 @@ export interface ApiImportedProductImportedProduct
       'oneToOne',
       'plugin::users-permissions.user'
     >;
-    reselling_price: Attribute.Decimal;
-    reseller_margin: Attribute.Decimal;
+    imported_product_variant: Attribute.Relation<
+      'api::imported-product.imported-product',
+      'oneToOne',
+      'api::imported-product-variant.imported-product-variant'
+    >;
+    description: Attribute.RichText;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
@@ -1612,6 +1655,47 @@ export interface ApiImportedProductImportedProduct
       Attribute.Private;
     updatedBy: Attribute.Relation<
       'api::imported-product.imported-product',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
+export interface ApiImportedProductVariantImportedProductVariant
+  extends Schema.CollectionType {
+  collectionName: 'imported_product_variants';
+  info: {
+    singularName: 'imported-product-variant';
+    pluralName: 'imported-product-variants';
+    displayName: 'Imported Product Variant';
+    description: '';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    imported_product: Attribute.Relation<
+      'api::imported-product-variant.imported-product-variant',
+      'oneToOne',
+      'api::imported-product.imported-product'
+    >;
+    price: Attribute.Decimal;
+    product_variant: Attribute.Relation<
+      'api::imported-product-variant.imported-product-variant',
+      'oneToOne',
+      'api::product-variant.product-variant'
+    >;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::imported-product-variant.imported-product-variant',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::imported-product-variant.imported-product-variant',
       'oneToOne',
       'admin::user'
     > &
@@ -2114,6 +2198,16 @@ export interface ApiProductProduct extends Schema.CollectionType {
       'oneToOne',
       'api::imported-product.imported-product'
     >;
+    brand: Attribute.Relation<
+      'api::product.product',
+      'manyToOne',
+      'api::brand.brand'
+    >;
+    seller: Attribute.Relation<
+      'api::product.product',
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
@@ -2198,6 +2292,11 @@ export interface ApiProductVariantProductVariant extends Schema.CollectionType {
       'api::product-variant.product-variant',
       'oneToMany',
       'api::bulk-pricing.bulk-pricing'
+    >;
+    imported_product_variant: Attribute.Relation<
+      'api::product-variant.product-variant',
+      'oneToOne',
+      'api::imported-product-variant.imported-product-variant'
     >;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
@@ -2769,6 +2868,7 @@ declare module '@strapi/strapi' {
       'api::address.address': ApiAddressAddress;
       'api::admin-subscription.admin-subscription': ApiAdminSubscriptionAdminSubscription;
       'api::banner.banner': ApiBannerBanner;
+      'api::brand.brand': ApiBrandBrand;
       'api::bulk-pricing.bulk-pricing': ApiBulkPricingBulkPricing;
       'api::campaign.campaign': ApiCampaignCampaign;
       'api::cart.cart': ApiCartCart;
@@ -2784,6 +2884,7 @@ declare module '@strapi/strapi' {
       'api::global-brand.global-brand': ApiGlobalBrandGlobalBrand;
       'api::group.group': ApiGroupGroup;
       'api::imported-product.imported-product': ApiImportedProductImportedProduct;
+      'api::imported-product-variant.imported-product-variant': ApiImportedProductVariantImportedProductVariant;
       'api::lead.lead': ApiLeadLead;
       'api::notification.notification': ApiNotificationNotification;
       'api::order.order': ApiOrderOrder;

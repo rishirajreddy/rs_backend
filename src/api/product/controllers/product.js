@@ -27,7 +27,7 @@ module.exports = createCoreController("api::product.product", ({ strapi }) => ({
       console.log("Into Changing Defaults Products API");
       const variants = ctx.request.body.data.variants;
       ctx.request.body.data.slug = genProdSlug(ctx.request.body.data.name);
-
+      ctx.request.body.data.seller = id;
       var response;
       try {
         response = await super.create(ctx);

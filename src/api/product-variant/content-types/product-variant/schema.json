@@ -46,6 +46,12 @@
       "relation": "oneToMany",
       "target": "api::bulk-pricing.bulk-pricing",
       "mappedBy": "product_variant"
+    },
+    "imported_product_variant": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::imported-product-variant.imported-product-variant",
+      "mappedBy": "product_variant"
     }
   }
 }

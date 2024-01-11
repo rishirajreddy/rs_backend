@@ -24,11 +24,14 @@
       "target": "plugin::users-permissions.user",
       "inversedBy": "imported_product"
     },
-    "reselling_price": {
-      "type": "decimal"
+    "imported_product_variant": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::imported-product-variant.imported-product-variant",
+      "mappedBy": "imported_product"
     },
-    "reseller_margin": {
-      "type": "decimal"
+    "description": {
+      "type": "richtext"
     }
   }
 }
